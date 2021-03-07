@@ -52,6 +52,17 @@ nnoremap <leader>fT :lua require("toggleTest").toggleToFile('vsplit')<cr>
 nnoremap <leader>fS :lua require("toggleTest").toggleToFile('split')<cr>
 ```
 
+### Settings
+
+- testFileSuffix.- Suffix used for the test files (default: "test")
+- testFolderName.- Folder name used for the test files (default: "tests")
+
+Example to keep the test file at the same level:
+
+```vim
+nnoremap <leader>ft :lua require("toggleTest").toggleToFile('edit', { testFolderName = false })<cr>
+```
+
 # Licence
 
 [UNLICENSE](LICENSE)
