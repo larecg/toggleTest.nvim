@@ -2,17 +2,26 @@ local utils = require("toggleTest.utils")
 
 local fileUtils = {}
 
-function fileUtils.getFileNameComponents (fileName)
-  local components = utils.splitString(fileName, "%.")
-  local extension = components[#components]
-  local baseName = components[1]
-  local suffix = #components > 2 and components[2] or nil
-  return baseName, suffix, extension
-end
+function fileUtils.getFilePathComponents(options)
+  local suffix
+  local folder = vim.fn.expand("%:p:h")
+  local baseName = vim.fn.expand("%:t")
+  local extension = vim.fn.expand("%:e")
 
-function fileUtils.getFilePathComponents (filePath)
-  local folder, fileName = string.match(filePath, "(.-)([^\\/]-%.?([^%.\\/]*))$")
-  local baseName, suffix, extension = fileUtils.getFileNameComponents(fileName)
+  local fileComponents = utils.splitString(baseName, "%.")
+
+  if extension then
+    table.remove(fileComponents)
+  end
+
+  if fileComponents[#fileComponents] == options.testFileSuffix then
+    suffix = options.testFileSuffix
+
+    table.remove(fileComponents)
+  end
+
+  baseName = table.concat(fileComponents, ".")
+
   return {
     folder = folder,
     suffix = suffix,
@@ -27,7 +36,7 @@ function fileUtils.isTestFile(fileComponents, options)
   end
 
   local pathComponents = utils.splitString(fileComponents.folder, "%/")
-  return pathComponents[#pathComponents - 1] == options.testFolderName
+  return pathComponents[#pathComponents] == options.testFolderName
 end
 
 function fileUtils.getImplementationFile(fileComponents, options)
@@ -36,8 +45,8 @@ function fileUtils.getImplementationFile(fileComponents, options)
   end
 
   local pathComponents = utils.splitString(fileComponents.folder, "%/")
-  if pathComponents[#pathComponents - 1] == options.testFolderName then
-    table.remove(pathComponents, #pathComponents - 1)
+  if pathComponents[#pathComponents] == options.testFolderName then
+    table.remove(pathComponents, #pathComponents)
     fileComponents.folder = table.concat(pathComponents, "/")
   end
 
@@ -50,7 +59,7 @@ function fileUtils.getTestFile(fileComponents, options)
   end
 
   if options.testFolderName then
-    fileComponents.folder = fileComponents.folder .. options.testFolderName .. "/"
+    fileComponents.folder = fileComponents.folder .. "/" .. options.testFolderName
   end
 
   return fileComponents
@@ -62,7 +71,7 @@ function fileUtils.composeFilePath(fileComponents)
   if fileComponents.suffix then table.insert(fileName, fileComponents.suffix) end
   if fileComponents.extension then table.insert(fileName, fileComponents.extension) end
 
-  return fileComponents.folder .. table.concat(fileName, ".")
+  return fileComponents.folder .. "/" .. table.concat(fileName, ".")
 end
 
 return fileUtils

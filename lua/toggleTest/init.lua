@@ -8,9 +8,9 @@ local defaultOptions = {
  testFolderName = "tests",
 }
 
-function toggleTest.getFileToToggle(currentFilePath, options)
+function toggleTest.getFileToToggle(options)
   options = utils.mergeTables(options, defaultOptions)
-  local currentFileComponents = fileUtils.getFilePathComponents(currentFilePath)
+  local currentFileComponents = fileUtils.getFilePathComponents(options)
 
   local fileToToggleComponents
   if fileUtils.isTestFile(currentFileComponents, options) then
@@ -20,7 +20,6 @@ function toggleTest.getFileToToggle(currentFilePath, options)
   end
 
   return {
-    currentFilePath = currentFilePath,
     currentFileComponents = currentFileComponents,
     fileToToggleComponents = fileToToggleComponents,
     fileToTogglePath = fileUtils.composeFilePath(fileToToggleComponents),
@@ -31,8 +30,7 @@ function toggleTest.toggleToFile(command, options)
   command = command or "edit"
   options = utils.mergeTables(options, defaultOptions)
 
-  local currentFilePath = vim.fn.expand("%:p")
-  local fileToToggle = toggleTest.getFileToToggle(currentFilePath, options)
+  local fileToToggle = toggleTest.getFileToToggle(options)
 
   vim.fn.mkdir(fileToToggle.fileToToggleComponents.folder, "p")
   vim.cmd(command .. " " .. fileToToggle.fileToTogglePath)
