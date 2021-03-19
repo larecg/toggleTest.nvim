@@ -12,18 +12,18 @@ function toggleTest.getFileToToggle(options)
   options = utils.mergeTables(options, defaultOptions)
   local currentFileComponents = fileUtils.getFilePathComponents(options)
 
-  local fileToToggleComponents
+  local response = {}
   if fileUtils.isTestFile(currentFileComponents, options) then
-    fileToToggleComponents = fileUtils.getImplementationFile(utils.mergeTables(currentFileComponents), options)
+    local fileToToggleComponents = fileUtils.getImplementationFile(currentFileComponents, options)
+    response.fileComponents = fileToToggleComponents
+    response.filePath = fileUtils.composeFilePath(fileToToggleComponents)
   else
-    fileToToggleComponents = fileUtils.getTestFile(utils.mergeTables(currentFileComponents), options)
+    local fileToToggleComponents = fileUtils.getTestFile(currentFileComponents, options)
+    response.fileComponents = fileToToggleComponents
+    response.filePath = fileUtils.composeFilePath(fileToToggleComponents)
   end
 
-  return {
-    currentFileComponents = currentFileComponents,
-    fileToToggleComponents = fileToToggleComponents,
-    fileToTogglePath = fileUtils.composeFilePath(fileToToggleComponents),
-  }
+  return response
 end
 
 function toggleTest.toggleToFile(command, options)
@@ -31,9 +31,8 @@ function toggleTest.toggleToFile(command, options)
   options = utils.mergeTables(options, defaultOptions)
 
   local fileToToggle = toggleTest.getFileToToggle(options)
-
-  vim.fn.mkdir(fileToToggle.fileToToggleComponents.folder, "p")
-  vim.cmd(command .. " " .. fileToToggle.fileToTogglePath)
+  vim.fn.mkdir(fileToToggle.fileComponents.folder, "p")
+  vim.cmd(command .. " " .. fileToToggle.filePath)
 end
 
 return toggleTest
